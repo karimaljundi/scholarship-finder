@@ -11,6 +11,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.common.exceptions import TimeoutException
 import time
+import re
 
 parent_dir=os.path.abspath('..')
 sys.path.append(parent_dir)
@@ -35,9 +36,23 @@ def save_scholarship(scholarship):
     db.session.add(new_scholarship)
     db.session.commit()
 
+def filter_value(text):
+        # Try matching a single value
+    single_value = re.search(r'\b(?:approx|around|about|up to|)\s*\$?(\d+)\b', text)
+    if single_value:
+        return int(single_value.group(1))
 
+    # Try matching a range
+    range_value = re.search(r'\$?(\d+)\s*(?:-|to)\s*\$?(\d+)', text)
+    if range_value:
+        low, high = map(int, range_value.groups())
+        return (low + high) // 2  # or low, or high
+
+    # Return None if no pattern matched
+    return None
 def scrape_uoft_scholarships():
-    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
+    service=Service(executable_path="chromedriver.exe")
+    driver = webdriver.Chrome(service=service)
 
     driver.get("https://uoftscholarships.smartsimple.com/ex/ex_viewreport.jsp?key=&token=%40HwoGSxocZERdRRtfQRxZQ11SZV1zH3pgEw~~")
     scholarships = []
@@ -53,7 +68,7 @@ def scrape_uoft_scholarships():
         for row in table.find_elements(By.TAG_NAME, "tr"):
             cells = row.find_elements(By.TAG_NAME, "td")
             if cells:     
-                    print(cells[7].text)         
+                    print(filter_value(cells[8].text))         
                     scholarship = {
                         "name": cells[0].text,
                         "description": cells[1].text,
@@ -63,7 +78,7 @@ def scrape_uoft_scholarships():
                         "application_required": cells[5].text,
                         "nature_of_award": cells[6].text,
                         "application_deadline": cells[7].text,
-                        "value": cells[8].text,
+                        "value": str(filter_value(cells[8].text)),
                         "university": "University of Toronto"
                     }
                     scholarships.append(scholarship)

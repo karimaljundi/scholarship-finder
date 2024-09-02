@@ -12,7 +12,7 @@ class Scholarship(db.Model):
     application_required = db.Column(db.String(1000), nullable=False)
     nature_of_award = db.Column(db.String(1000), nullable=False)
     application_deadline = db.Column(db.String(1000), nullable=False)
-    value = db.Column(db.String(1000), nullable=False)
+    value = db.Column(db.String(1000))
     university = db.Column(db.String(1000), nullable=False)
     
 

@@ -1,27 +1,20 @@
 import logo from './logo.svg';
 import './App.css';
-import Scholarships from './components/Scholarships';
+import Search from './components/Search';
+const fetchScholarships = async () => {
+  const response = await fetch('http://127.0.0.1:5000/all_scholarships');
+  const data = await response.json();
+  console.log(data[0]);
+  return data; // Adjust this line based on your actual data structure
+};
 
-function App() {
+const App = () => {
+  console.log(fetchScholarships());
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-      <Scholarships/>
-    </div>
+      <div>
+          <Search fetchScholarships={fetchScholarships} />
+      </div>
   );
-}
+};
 
 export default App;
